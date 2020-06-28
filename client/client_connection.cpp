@@ -240,7 +240,14 @@ void ClientConnection::getNextMessage(const MessageHandler<msg::BaseMessage>& ha
                                         for (auto iter = pendingRequests_.begin(); iter != pendingRequests_.end(); ++iter)
                                         {
                                             auto request = *iter;
-                                            if (auto req = request.lock())
+                                            try {
+	                                            auto req = request.lock();
+	                                        }
+                                        	catch (const std::exception& e)
+											{
+												LOG(ERROR, LOG_TAG) << "Exception getting lock before reading next message: " << e.what() << "\n";
+											}
+                                            if (req)
                                             {
                                                 if (req->id() == base_message_.refersTo)
                                                 {
