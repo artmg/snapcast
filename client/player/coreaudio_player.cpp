@@ -205,8 +205,37 @@ void CoreAudioPlayer::initAudioQueue()
 
 void CoreAudioPlayer::uninitAudioQueue(AudioQueueRef queue)
 {
-    AudioQueueStop(queue, false);
-    AudioQueueDispose(queue, false);
-    pubStream_->clearChunks();
-    CFRunLoopStop(CFRunLoopGetCurrent());
+	LOG(DEBUG, LOG_TAG) << "Freeing up audio queue\n";
+	try
+	{
+		AudioQueueStop(queue, false);
+	}
+	catch (const std::exception& e)
+	{
+		LOG(ERROR, LOG_TAG) << "Exception stopping queue: " << e.what() << "\n";
+	}
+	try
+	{
+		AudioQueueDispose(queue, false);
+	}
+	catch (const std::exception& e)
+	{
+		LOG(ERROR, LOG_TAG) << "Exception disposing queue: " << e.what() << "\n";
+	}
+	try
+	{
+		pubStream_->clearChunks();
+	}
+	catch (const std::exception& e)
+	{
+		LOG(ERROR, LOG_TAG) << "Exception clearing chunks from stream: " << e.what() << "\n";
+	}
+	try
+	{
+		CFRunLoopStop(CFRunLoopGetCurrent());
+	}
+	catch (const std::exception& e)
+	{
+		LOG(ERROR, LOG_TAG) << "Exception getting CoreFoundation RunLoop: " << e.what() << "\n";
+	}
 }
